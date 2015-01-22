@@ -1,15 +1,58 @@
-## Put comments here that give an overall description of what your
-## functions do
+##############################################################
+## Two functions to provide cache-enabled matrix solving
+## To use, create an instance of the solving object by calling
+## makeCacheMatrix, then call cacheSolve on this instance to 
+## return either a calculated or cached solution.
 
-## Write a short comment describing this function
+## Create a set of functions to solve a matrix.
+## Example usage: 
+##  m<-matrix(c(1,7,2,3,1,6,0,4,1), nrow=3, ncol=3)
+##  mcm<-makeCacheMatrix(m)
+##  cacheSolve(mcm)             ## < calculated result
+##  cacheSolve(mcm)             ## < cached result
+##############################################################
 
-makeCacheMatrix <- function(x = matrix()) {
+##############################################################
+## makeCacheMatrix creates the 'solving object' with a cached
+## result
+##############################################################
+makeCacheMatrix <- function(baseMatrix = matrix()) {
+    # variable to hold value of solution, initially null
+    resultMatrix <- NULL
+    # create a function to set values
+    set <- function(y) {
+        baseMatrix <<- y
+        resultMatrix <<- NULL
+    }
+    # function to return the orignal value
+    get <- function() baseMatrix
+    
+    # function to allow the cached value to be set
+    setinverse <- function(solve) resultMatrix <<- solve
+    # function to return the cached value (null on first call)
+    getinverse <- function() resultMatrix
+    
+    
+    list(set = set, get = get,
+         setinverse = setinverse,
+         getinverse = getinverse)
 
 }
 
-
-## Write a short comment describing this function
-
+##############################################################
+## Function to solve a matrix and return a cached result if 
+## available
+##############################################################
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
+    result <- x$getinverse()
+    if(!is.null(result)) {
+        message("getting cached data")
+        return(result)
+    }
+    data <- x$get()
+    result <- solve(data, ...)
+    x$setinverse(result)
+    result
+    
 }
